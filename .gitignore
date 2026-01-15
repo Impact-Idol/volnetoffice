@@ -110,3 +110,8 @@ build/
 .react-router/
 temp/
 scripts/
+
+# Impact Idol-specific integrations (private)
+apps/api/plane/authentication/views/revocation.py
+apps/api/plane/bgtasks/scheduled_webhooks.py
+apps/mailbox/
