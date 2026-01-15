@@ -111,6 +111,18 @@ class User(AbstractBaseUser, PermissionsMixin):
     # masking
     masked_at = models.DateTimeField(null=True)
 
+    # Security - Token versioning for session revocation
+    token_version = models.IntegerField(
+        default=0,
+        help_text="Incremented when user sessions are revoked. Used to invalidate JWTs.",
+    )
+
+    # Security - Break glass access (emergency SSO bypass)
+    sso_bypass = models.BooleanField(
+        default=False,
+        help_text="Allow this super admin to bypass SSO for emergency access.",
+    )
+
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
 

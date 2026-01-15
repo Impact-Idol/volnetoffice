@@ -72,6 +72,7 @@ from .workspace import (
     WorkspaceHomePreference,
     WorkspaceUserPreference,
 )
+from .workspace_extension import WorkspaceChapterMapping
 
 from .favorite import UserFavorite
 
@@ -86,3 +87,19 @@ from .device import Device, DeviceSession
 from .sticky import Sticky
 
 from .description import Description, DescriptionVersion
+
+from .blacklisted_token import BlacklistedToken
+
+# HIPAA Compliance models
+from .audit import AuditLog, PHIAccessLog
+from .retention import (
+    RetentionPolicy,
+    RetentionExemption,
+    RetentionJobRun,
+    RetentionArchive,
+)
+from .password_history import (
+    PasswordHistory,
+    FailedLoginAttempt,
+    AccountLockout,
+)

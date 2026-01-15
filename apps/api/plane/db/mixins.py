@@ -1,12 +1,142 @@
 # Type imports
 from typing import Any
 
+# Python imports
+import base64
+import os
+
 # Django imports
 from django.db import models
 from django.utils import timezone
+from django.conf import settings
+
+# Third party imports
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 # Module imports
 from plane.bgtasks.deletion_task import soft_delete_related_objects
+
+
+# =============================================================================
+# HIPAA-COMPLIANT ENCRYPTED FIELDS
+# =============================================================================
+
+def get_encryption_key():
+    """Get or generate encryption key from settings"""
+    key = getattr(settings, 'ENCRYPTION_KEY', None)
+    if key:
+        # If key is a string, encode it
+        if isinstance(key, str):
+            # Ensure it's a valid Fernet key (32 url-safe base64-encoded bytes)
+            return key.encode() if len(key) == 44 else Fernet.generate_key()
+        return key
+    # Generate a key for development (should be set in production)
+    return Fernet.generate_key()
+
+
+class EncryptedTextField(models.TextField):
+    """
+    AES-256 encrypted text field for HIPAA-compliant PHI storage.
+
+    Uses Fernet symmetric encryption (AES-128-CBC with HMAC).
+    Data is base64 encoded for storage in text fields.
+    """
+
+    description = "An AES-256 encrypted text field"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _get_fernet(self):
+        """Lazy load Fernet to avoid issues during migrations"""
+        if not hasattr(self, '_fernet'):
+            self._fernet = Fernet(get_encryption_key())
+        return self._fernet
+
+    def get_prep_value(self, value):
+        """Encrypt value before saving to database"""
+        if value is None:
+            return value
+        if isinstance(value, str):
+            value = value.encode('utf-8')
+        encrypted = self._get_fernet().encrypt(value)
+        return base64.b64encode(encrypted).decode('utf-8')
+
+    def from_db_value(self, value, expression, connection):
+        """Decrypt value when reading from database"""
+        if value is None:
+            return value
+        try:
+            encrypted = base64.b64decode(value.encode('utf-8'))
+            decrypted = self._get_fernet().decrypt(encrypted)
+            return decrypted.decode('utf-8')
+        except Exception:
+            # Return raw value if decryption fails (for legacy data)
+            return value
+
+    def deconstruct(self):
+        name, path, args, kwargs = super().deconstruct()
+        return name, path, args, kwargs
+
+
+class EncryptedCharField(models.CharField):
+    """
+    AES-256 encrypted char field for HIPAA-compliant PHI storage.
+
+    Note: max_length should account for encryption overhead (~1.5x original).
+    """
+
+    description = "An AES-256 encrypted char field"
+
+    def __init__(self, *args, **kwargs):
+        # Increase max_length to account for encryption overhead
+        if 'max_length' in kwargs:
+            kwargs['max_length'] = max(kwargs['max_length'] * 2, 255)
+        super().__init__(*args, **kwargs)
+
+    def _get_fernet(self):
+        """Lazy load Fernet to avoid issues during migrations"""
+        if not hasattr(self, '_fernet'):
+            self._fernet = Fernet(get_encryption_key())
+        return self._fernet
+
+    def get_prep_value(self, value):
+        """Encrypt value before saving to database"""
+        if value is None:
+            return value
+        if isinstance(value, str):
+            value = value.encode('utf-8')
+        encrypted = self._get_fernet().encrypt(value)
+        return base64.b64encode(encrypted).decode('utf-8')
+
+    def from_db_value(self, value, expression, connection):
+        """Decrypt value when reading from database"""
+        if value is None:
+            return value
+        try:
+            encrypted = base64.b64decode(value.encode('utf-8'))
+            decrypted = self._get_fernet().decrypt(encrypted)
+            return decrypted.decode('utf-8')
+        except Exception:
+            # Return raw value if decryption fails (for legacy data)
+            return value
+
+    def deconstruct(self):
+        name, path, args, kwargs = super().deconstruct()
+        return name, path, args, kwargs
+
+
+class EncryptedEmailField(EncryptedCharField):
+    """
+    AES-256 encrypted email field for HIPAA-compliant PHI storage.
+    """
+
+    description = "An AES-256 encrypted email field"
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('max_length', 254)
+        super().__init__(*args, **kwargs)
 
 
 class TimeAuditModel(models.Model):

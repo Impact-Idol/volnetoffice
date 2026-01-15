@@ -500,3 +500,259 @@ def model_activity(model_name, model_id, requested_data, current_instance, actor
                 )
 
     return
+
+
+# =============================================================================
+# IMPACT IDOL WEBHOOK NOTIFICATIONS
+# =============================================================================
+
+@shared_task(
+    bind=True,
+    autoretry_for=(requests.RequestException,),
+    retry_backoff=60,
+    max_retries=3,
+    retry_jitter=True,
+)
+def notify_impactidol(
+    self,
+    event_type: str,
+    payload: Dict[str, Any],
+) -> None:
+    """
+    Send webhook notifications to Impact Idol for task-related events.
+
+    Events:
+    - issue.assigned: Task assigned to user
+    - issue.comment.created: New comment on task
+    - issue.status.changed: Task status changed
+    - issue.due_date.approaching: Task due date approaching
+    - issue.mentioned: User mentioned in task
+
+    Args:
+        event_type (str): The type of event
+        payload (dict): Event payload containing issue, actor, target info
+    """
+    webhook_url = getattr(settings, 'IMPACTIDOL_WEBHOOK_URL', None)
+    webhook_secret = getattr(settings, 'IMPACTIDOL_WEBHOOK_SECRET', None)
+
+    if not webhook_url:
+        logger.debug("Impact Idol webhook URL not configured, skipping")
+        return
+
+    try:
+        # Build the request body
+        body = {
+            'event': event_type,
+            'payload': payload,
+        }
+        body_str = json.dumps(body, cls=DjangoJSONEncoder)
+
+        # Generate HMAC signature
+        headers = {
+            'Content-Type': 'application/json',
+            'User-Agent': 'VolNetOffice/1.0',
+        }
+
+        if webhook_secret:
+            signature = hmac.new(
+                webhook_secret.encode('utf-8'),
+                body_str.encode('utf-8'),
+                hashlib.sha256,
+            ).hexdigest()
+            headers['X-Plane-Signature'] = signature
+
+        # Send the webhook
+        response = requests.post(
+            webhook_url,
+            data=body_str,
+            headers=headers,
+            timeout=10,
+        )
+        response.raise_for_status()
+
+        logger.info(f"Impact Idol webhook sent successfully: {event_type}")
+
+    except requests.RequestException as e:
+        logger.error(f"Impact Idol webhook failed: {e}")
+        if self.request.retries < self.max_retries:
+            raise  # Trigger retry
+    except Exception as e:
+        log_exception(e)
+        logger.error(f"Impact Idol webhook error: {e}")
+
+
+def send_impactidol_issue_assigned(issue_id: str, assignee_email: str, actor_name: str) -> None:
+    """
+    Send notification when an issue is assigned to a user.
+
+    Args:
+        issue_id: The issue ID
+        assignee_email: Email of the assigned user
+        actor_name: Name of the user who made the assignment
+    """
+    try:
+        issue = Issue.objects.select_related('project').get(pk=issue_id)
+        notify_impactidol.delay(
+            event_type='issue.assigned',
+            payload={
+                'issue': {
+                    'id': str(issue.id),
+                    'name': issue.name,
+                    'url': f'/employee-portal/issue/{issue.id}',
+                },
+                'project': {
+                    'id': str(issue.project_id),
+                    'name': issue.project.name,
+                },
+                'assignee': {
+                    'email': assignee_email,
+                },
+                'actor': {
+                    'name': actor_name,
+                },
+            },
+        )
+    except Issue.DoesNotExist:
+        logger.warning(f"Issue {issue_id} not found for Impact Idol notification")
+
+
+def send_impactidol_issue_comment(issue_id: str, target_email: str, actor_name: str, comment_preview: str) -> None:
+    """
+    Send notification when a comment is added to an issue.
+
+    Args:
+        issue_id: The issue ID
+        target_email: Email of the user to notify
+        actor_name: Name of the commenter
+        comment_preview: Preview of the comment text
+    """
+    try:
+        issue = Issue.objects.select_related('project').get(pk=issue_id)
+        notify_impactidol.delay(
+            event_type='issue.comment.created',
+            payload={
+                'issue': {
+                    'id': str(issue.id),
+                    'name': issue.name,
+                    'url': f'/employee-portal/issue/{issue.id}',
+                },
+                'project': {
+                    'id': str(issue.project_id),
+                    'name': issue.project.name,
+                },
+                'target': {
+                    'email': target_email,
+                },
+                'actor': {
+                    'name': actor_name,
+                },
+                'comment': {
+                    'content': comment_preview[:200],
+                },
+            },
+        )
+    except Issue.DoesNotExist:
+        logger.warning(f"Issue {issue_id} not found for Impact Idol notification")
+
+
+def send_impactidol_status_changed(issue_id: str, assignee_email: str, new_status: str) -> None:
+    """
+    Send notification when an issue status changes.
+
+    Args:
+        issue_id: The issue ID
+        assignee_email: Email of the assigned user
+        new_status: The new status name
+    """
+    try:
+        issue = Issue.objects.select_related('project').get(pk=issue_id)
+        notify_impactidol.delay(
+            event_type='issue.status.changed',
+            payload={
+                'issue': {
+                    'id': str(issue.id),
+                    'name': issue.name,
+                    'url': f'/employee-portal/issue/{issue.id}',
+                },
+                'project': {
+                    'id': str(issue.project_id),
+                    'name': issue.project.name,
+                },
+                'target': {
+                    'email': assignee_email,
+                },
+                'new_status': new_status,
+            },
+        )
+    except Issue.DoesNotExist:
+        logger.warning(f"Issue {issue_id} not found for Impact Idol notification")
+
+
+def send_impactidol_mentioned(issue_id: str, mentioned_email: str, actor_name: str) -> None:
+    """
+    Send notification when a user is mentioned in an issue.
+
+    Args:
+        issue_id: The issue ID
+        mentioned_email: Email of the mentioned user
+        actor_name: Name of the user who made the mention
+    """
+    try:
+        issue = Issue.objects.select_related('project').get(pk=issue_id)
+        notify_impactidol.delay(
+            event_type='issue.mentioned',
+            payload={
+                'issue': {
+                    'id': str(issue.id),
+                    'name': issue.name,
+                    'url': f'/employee-portal/issue/{issue.id}',
+                },
+                'project': {
+                    'id': str(issue.project_id),
+                    'name': issue.project.name,
+                },
+                'target': {
+                    'email': mentioned_email,
+                },
+                'actor': {
+                    'name': actor_name,
+                },
+            },
+        )
+    except Issue.DoesNotExist:
+        logger.warning(f"Issue {issue_id} not found for Impact Idol notification")
+
+
+def send_impactidol_due_soon(issue_id: str, assignee_email: str, due_date: str, hours_remaining: int) -> None:
+    """
+    Send notification when an issue's due date is approaching.
+
+    Args:
+        issue_id: The issue ID
+        assignee_email: Email of the assigned user
+        due_date: The due date string (ISO format)
+        hours_remaining: Hours until due date
+    """
+    try:
+        issue = Issue.objects.select_related('project').get(pk=issue_id)
+        notify_impactidol.delay(
+            event_type='issue.due_date.approaching',
+            payload={
+                'issue': {
+                    'id': str(issue.id),
+                    'name': issue.name,
+                    'url': f'/employee-portal/issue/{issue.id}',
+                },
+                'project': {
+                    'id': str(issue.project_id),
+                    'name': issue.project.name,
+                },
+                'target': {
+                    'email': assignee_email,
+                },
+                'due_date': due_date,
+                'hours_remaining': hours_remaining,
+            },
+        )
+    except Issue.DoesNotExist:
+        logger.warning(f"Issue {issue_id} not found for Impact Idol notification")

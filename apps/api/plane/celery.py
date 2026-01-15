@@ -73,6 +73,15 @@ app.conf.beat_schedule = {
         "task": "plane.bgtasks.exporter_expired_task.delete_old_s3_link",
         "schedule": crontab(hour=3, minute=45),  # UTC 03:45
     },
+    # HIPAA Compliance Tasks
+    "hipaa-daily-retention-job": {
+        "task": "plane.bgtasks.retention_task.run_retention_job",
+        "schedule": crontab(hour=4, minute=0),  # UTC 04:00 - Run daily
+    },
+    "hipaa-check-expired-legal-holds": {
+        "task": "plane.bgtasks.retention_task.check_expired_legal_holds",
+        "schedule": crontab(hour=4, minute=30),  # UTC 04:30
+    },
 }
 
 

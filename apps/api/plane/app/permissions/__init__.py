@@ -15,3 +15,12 @@ from .project import (
 )
 from .base import allow_permission, ROLE
 from .page import ProjectPagePermission
+
+# HIPAA Compliance permissions
+from .hipaa import (
+    HIPAABasePermission,
+    RequireMFA,
+    RequirePHIAccess,
+    SessionTimeoutPermission,
+    ConcurrentSessionPermission,
+)

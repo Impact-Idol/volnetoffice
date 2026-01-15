@@ -70,6 +70,9 @@ MIDDLEWARE = [
     "plane.middleware.request_body_size.RequestBodySizeLimitMiddleware",
     "plane.middleware.logger.APITokenLogMiddleware",
     "plane.middleware.logger.RequestLoggerMiddleware",
+    # HIPAA Compliance Middleware
+    "plane.middleware.hipaa_session.HIPAASessionMiddleware",
+    "plane.middleware.hipaa_session.FailedLoginMiddleware",
 ]
 
 # Rest Framework settings
@@ -284,7 +287,27 @@ CELERY_IMPORTS = (
     # issue version tasks
     "plane.bgtasks.issue_version_sync",
     "plane.bgtasks.issue_description_version_sync",
+    # HIPAA compliance tasks
+    "plane.bgtasks.retention_task",
+    # Impact Idol webhook tasks
+    "plane.bgtasks.scheduled_webhooks",
 )
+
+# Celery Beat Schedule - Periodic Tasks
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    # Check for issues with approaching due dates (hourly during business hours)
+    "check-upcoming-deadlines": {
+        "task": "plane.bgtasks.scheduled_webhooks.check_upcoming_deadlines",
+        "schedule": crontab(hour="9-17", minute="0"),  # Every hour 9am-5pm UTC
+    },
+    # Check for overdue issues (daily at 9am)
+    "check-overdue-issues": {
+        "task": "plane.bgtasks.scheduled_webhooks.check_overdue_issues",
+        "schedule": crontab(hour="9", minute="0"),  # Daily at 9am UTC
+    },
+}
 
 FILE_SIZE_LIMIT = int(os.environ.get("FILE_SIZE_LIMIT", 5242880))
 
@@ -300,6 +323,23 @@ ANALYTICS_BASE_API = os.environ.get("ANALYTICS_BASE_API", False)
 # Posthog settings
 POSTHOG_API_KEY = os.environ.get("POSTHOG_API_KEY", False)
 POSTHOG_HOST = os.environ.get("POSTHOG_HOST", False)
+
+# Impact Idol Integration
+# -----------------------------------------
+# Service token for service-to-service API calls (session revocation, user sync)
+PLANE_SERVICE_TOKEN = os.environ.get("PLANE_SERVICE_TOKEN", None)
+IMPACTIDOL_SERVICE_TOKEN = os.environ.get("IMPACTIDOL_SERVICE_TOKEN", PLANE_SERVICE_TOKEN)
+
+# Webhook URL for sending notifications to Impact Idol
+IMPACTIDOL_WEBHOOK_URL = os.environ.get("IMPACTIDOL_WEBHOOK_URL", "http://localhost:4500/api/webhooks/plane")
+# Shared secret for signing webhooks (must match PLANE_WEBHOOK_SECRET in Impact Idol)
+IMPACTIDOL_WEBHOOK_SECRET = os.environ.get("IMPACTIDOL_WEBHOOK_SECRET", None)
+
+# SSO Configuration
+# JWT secret for SSO token validation (must match PLANE_JWT_SECRET in Impact Idol)
+IMPACTIDOL_JWT_SECRET = os.environ.get("IMPACTIDOL_JWT_SECRET", os.environ.get("PLANE_JWT_SECRET", None))
+# Default workspace slug for SSO users
+DEFAULT_WORKSPACE_SLUG = os.environ.get("DEFAULT_WORKSPACE_SLUG", os.environ.get("PLANE_WORKSPACE_SLUG", "staff"))
 
 # Skip environment variable configuration
 SKIP_ENV_VAR = os.environ.get("SKIP_ENV_VAR", "1") == "1"

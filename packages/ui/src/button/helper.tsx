@@ -9,7 +9,14 @@ export type TButtonVariant =
   | "outline-danger"
   | "link-danger"
   | "tertiary-danger"
-  | "link-neutral";
+  | "link-neutral"
+  // Impact Idol Design System Variants
+  | "ii-primary"
+  | "ii-secondary"
+  | "ii-destructive"
+  | "ii-ghost"
+  | "ii-outline"
+  | "ii-link";
 
 export type TButtonSizes = "sm" | "md" | "lg" | "xl";
 
@@ -27,6 +34,14 @@ enum buttonSizeStyling {
   md = `px-4 py-1.5 font-medium text-13 rounded-sm flex items-center gap-1.5 whitespace-nowrap transition-all justify-center`,
   lg = `px-5 py-2 font-medium text-13 rounded-sm flex items-center gap-1.5 whitespace-nowrap transition-all justify-center`,
   xl = `px-5 py-3.5 font-medium text-13 rounded-sm flex items-center gap-1.5 whitespace-nowrap transition-all justify-center`,
+}
+
+// Impact Idol button sizes with 44px minimum touch targets (WCAG 2.5.5)
+enum iiButtonSizeStyling {
+  sm = `px-3 py-2 font-medium text-sm rounded-[0.5rem] flex items-center gap-2 whitespace-nowrap transition-all justify-center min-h-[36px]`,
+  md = `px-4 py-2.5 font-medium text-sm rounded-[0.5rem] flex items-center gap-2 whitespace-nowrap transition-all justify-center min-h-[44px] min-w-[44px]`,
+  lg = `px-5 py-3 font-medium text-base rounded-[0.5rem] flex items-center gap-2 whitespace-nowrap transition-all justify-center min-h-[48px] min-w-[48px]`,
+  xl = `px-6 py-4 font-medium text-base rounded-[0.5rem] flex items-center gap-2 whitespace-nowrap transition-all justify-center min-h-[56px] min-w-[56px]`,
 }
 
 enum buttonIconStyling {
@@ -103,6 +118,43 @@ export const buttonStyling: IButtonStyling = {
     pressed: `focus:text-primary`,
     disabled: `cursor-not-allowed !bg-layer-1 !text-placeholder`,
   },
+  // Impact Idol Design System Button Variants
+  "ii-primary": {
+    default: `bg-[hsl(210_100%_50%)] text-white`,
+    hover: `hover:bg-[hsl(210_100%_45%)]`,
+    pressed: `focus:bg-[hsl(210_100%_40%)] focus:ring-2 focus:ring-[hsl(210_100%_70%)] focus:ring-offset-2`,
+    disabled: `cursor-not-allowed !bg-[hsl(210_20%_80%)] !text-[hsl(210_10%_60%)]`,
+  },
+  "ii-secondary": {
+    default: `bg-transparent text-[hsl(217.2_32.6%_17.5%)] border border-[hsl(214.3_31.8%_91.4%)]`,
+    hover: `hover:bg-[hsl(210_40%_98%)] hover:border-[hsl(214.3_31.8%_85%)]`,
+    pressed: `focus:bg-[hsl(210_40%_96%)] focus:ring-2 focus:ring-[hsl(210_100%_70%)] focus:ring-offset-2`,
+    disabled: `cursor-not-allowed !bg-transparent !text-[hsl(215.4_20.2%_65.1%)] !border-[hsl(214.3_31.8%_91.4%)]`,
+  },
+  "ii-destructive": {
+    default: `bg-[hsl(0_84.2%_60.2%)] text-white`,
+    hover: `hover:bg-[hsl(0_84.2%_55%)]`,
+    pressed: `focus:bg-[hsl(0_84.2%_50%)] focus:ring-2 focus:ring-[hsl(0_84.2%_80%)] focus:ring-offset-2`,
+    disabled: `cursor-not-allowed !bg-[hsl(0_30%_80%)] !text-[hsl(0_10%_60%)]`,
+  },
+  "ii-ghost": {
+    default: `bg-transparent text-[hsl(217.2_32.6%_17.5%)]`,
+    hover: `hover:bg-[hsl(210_40%_96.1%)]`,
+    pressed: `focus:bg-[hsl(210_40%_94%)] focus:ring-2 focus:ring-[hsl(210_100%_70%)] focus:ring-offset-2`,
+    disabled: `cursor-not-allowed !text-[hsl(215.4_20.2%_65.1%)]`,
+  },
+  "ii-outline": {
+    default: `bg-transparent text-[hsl(210_100%_50%)] border border-[hsl(210_100%_50%)]`,
+    hover: `hover:bg-[hsl(210_100%_97%)]`,
+    pressed: `focus:bg-[hsl(210_100%_95%)] focus:ring-2 focus:ring-[hsl(210_100%_70%)] focus:ring-offset-2`,
+    disabled: `cursor-not-allowed !text-[hsl(210_50%_70%)] !border-[hsl(210_50%_70%)]`,
+  },
+  "ii-link": {
+    default: `bg-transparent text-[hsl(210_100%_50%)] underline-offset-2`,
+    hover: `hover:text-[hsl(210_100%_45%)] hover:underline`,
+    pressed: `focus:text-[hsl(210_100%_40%)]`,
+    disabled: `cursor-not-allowed !text-[hsl(210_50%_70%)]`,
+  },
 };
 
 export const getButtonStyling = (variant: TButtonVariant, size: TButtonSizes, disabled: boolean = false): string => {
@@ -113,8 +165,12 @@ export const getButtonStyling = (variant: TButtonVariant, size: TButtonSizes, di
     currentVariant.pressed
   }`;
 
+  // Use Impact Idol sizing (with 44px touch targets) for ii-* variants
   let tempSize: string = ``;
-  if (size) tempSize = buttonSizeStyling[size];
+  if (size) {
+    const isImpactIdolVariant = variant.startsWith("ii-");
+    tempSize = isImpactIdolVariant ? iiButtonSizeStyling[size] : buttonSizeStyling[size];
+  }
   return `${tempVariant} ${tempSize}`;
 };
 
