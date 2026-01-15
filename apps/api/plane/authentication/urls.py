@@ -40,6 +40,11 @@ from .views import (
     GiteaOauthInitiateEndpoint,
     GiteaCallbackSpaceEndpoint,
     GiteaOauthInitiateSpaceEndpoint,
+    # Security
+    EmergencySessionRevocationView,
+    BreakGlassLoginView,
+    # SSO
+    ImpactIdolSSOView,
 )
 
 urlpatterns = [
@@ -145,5 +150,23 @@ urlpatterns = [
         "spaces/gitea/callback/",
         GiteaCallbackSpaceEndpoint.as_view(),
         name="space-gitea-callback",
+    ),
+    # Security - Session Revocation (called by Impact Idol)
+    path(
+        "revoke-sessions/",
+        EmergencySessionRevocationView.as_view(),
+        name="revoke-sessions",
+    ),
+    # Security - Break Glass Login (emergency super admin access)
+    path(
+        "breakglass/",
+        BreakGlassLoginView.as_view(),
+        name="breakglass-login",
+    ),
+    # Impact Idol SSO - JWT token exchange for Plane access
+    path(
+        "impactidol-sso/",
+        ImpactIdolSSOView.as_view(),
+        name="impactidol-sso",
     ),
 ]

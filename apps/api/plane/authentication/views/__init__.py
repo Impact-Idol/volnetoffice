@@ -37,3 +37,10 @@ from .space.password_management import (
     ResetPasswordSpaceEndpoint,
 )
 from .app.password_management import ForgotPasswordEndpoint, ResetPasswordEndpoint
+
+# Security views
+from .revocation import EmergencySessionRevocationView
+from .breakglass import BreakGlassLoginView
+
+# SSO views
+from .sso import ImpactIdolSSOView

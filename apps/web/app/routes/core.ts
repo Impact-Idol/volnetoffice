@@ -12,6 +12,9 @@ export const coreRoutes: RouteConfigEntry[] = [
   // Sign Up
   layout("./(all)/sign-up/layout.tsx", [route("sign-up", "./(all)/sign-up/page.tsx")]),
 
+  // SSO Authentication - Impact Idol
+  layout("./(all)/sso/layout.tsx", [route("sso", "./(all)/sso/page.tsx")]),
+
   // Account Routes - Password Management
   layout("./(all)/accounts/forgot-password/layout.tsx", [
     route("accounts/forgot-password", "./(all)/accounts/forgot-password/page.tsx"),
