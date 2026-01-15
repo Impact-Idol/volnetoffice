@@ -1,3 +1,39 @@
+# VolNetOffice
+
+> **Impact Idol Internal Employee Portal**
+
+This is a fork of [Plane](https://github.com/makeplane/plane) licensed under **AGPL-3.0**.
+
+## Modifications for VolNetOffice (Impact Idol Internal Portal)
+
+- **SSO Integration** - Single sign-on bridge to Impact Idol main application
+- **Rails Action Mailbox** - Email intake integration for task creation
+- **HIPAA Compliance** - Enhanced encryption, audit logging, and data retention policies
+- **Custom Theming** - Impact Idol branding and accessibility improvements
+- **Session Security** - Enhanced session revocation on termination/demotion/suspension
+
+**Source Code:** https://github.com/impactidol/volnetoffice
+
+---
+
+## Quick Start (Development)
+
+```bash
+# From the impact-idol root directory
+docker compose -f docker-compose.employee-portal.yml up -d
+
+# Access:
+# - Impact Idol:    http://localhost:5000
+# - VolNetOffice:   http://localhost:3000
+# - Plane API:      http://localhost:8000
+# - MinIO Console:  http://localhost:9090
+# - RabbitMQ:       http://localhost:15672
+```
+
+---
+
+## Original Plane Documentation
+
 <br /><br />
 
 <p align="center">

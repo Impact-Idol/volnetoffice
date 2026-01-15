@@ -1,0 +1,479 @@
+/**
+ * Impact Idol Typography System
+ *
+ * Provides:
+ * - Fluid typography that scales with viewport
+ * - Responsive text sizes using clamp()
+ * - Rich text styling for issue descriptions
+ * - Heading hierarchy with consistent spacing
+ */
+
+/* ============================================================================
+   FLUID TYPOGRAPHY SCALE
+   Uses clamp() for smooth scaling between mobile and desktop
+   Format: clamp(min, preferred, max)
+   ============================================================================ */
+
+/* Extra Small - Captions, helper text */
+.text-fluid-xs {
+  font-size: clamp(0.6875rem, 1.5vw + 0.5rem, 0.8125rem);
+  line-height: 1.5;
+}
+
+/* Small - Secondary text, labels */
+.text-fluid-sm {
+  font-size: clamp(0.8125rem, 1.75vw + 0.5rem, 0.9375rem);
+  line-height: 1.5;
+}
+
+/* Base - Body text, default */
+.text-fluid-base {
+  font-size: clamp(0.9375rem, 2vw + 0.5rem, 1.0625rem);
+  line-height: 1.6;
+}
+
+/* Medium - Slightly emphasized body */
+.text-fluid-md {
+  font-size: clamp(1rem, 2.25vw + 0.5rem, 1.125rem);
+  line-height: 1.6;
+}
+
+/* Large - Subheadings, emphasis */
+.text-fluid-lg {
+  font-size: clamp(1.0625rem, 2.5vw + 0.5rem, 1.25rem);
+  line-height: 1.5;
+}
+
+/* Extra Large - Section headings */
+.text-fluid-xl {
+  font-size: clamp(1.1875rem, 3vw + 0.5rem, 1.5rem);
+  line-height: 1.4;
+}
+
+/* 2XL - Page titles */
+.text-fluid-2xl {
+  font-size: clamp(1.375rem, 3.5vw + 0.5rem, 1.875rem);
+  line-height: 1.3;
+}
+
+/* 3XL - Hero text */
+.text-fluid-3xl {
+  font-size: clamp(1.625rem, 4vw + 0.5rem, 2.25rem);
+  line-height: 1.25;
+}
+
+/* 4XL - Large display text */
+.text-fluid-4xl {
+  font-size: clamp(2rem, 5vw + 0.5rem, 3rem);
+  line-height: 1.2;
+}
+
+/* 5XL - Extra large display */
+.text-fluid-5xl {
+  font-size: clamp(2.5rem, 6vw + 0.5rem, 3.75rem);
+  line-height: 1.15;
+}
+
+/* ============================================================================
+   HEADING STYLES
+   Semantic heading classes with consistent spacing
+   ============================================================================ */
+
+.ii-h1 {
+  font-size: clamp(1.75rem, 4vw + 0.5rem, 2.5rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  color: var(--ii-text-primary, hsl(222.2 84% 4.9%));
+}
+
+.ii-h2 {
+  font-size: clamp(1.5rem, 3.5vw + 0.5rem, 2rem);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  color: var(--ii-text-primary, hsl(222.2 84% 4.9%));
+}
+
+.ii-h3 {
+  font-size: clamp(1.25rem, 3vw + 0.5rem, 1.5rem);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+  color: var(--ii-text-primary, hsl(222.2 84% 4.9%));
+}
+
+.ii-h4 {
+  font-size: clamp(1.125rem, 2.5vw + 0.5rem, 1.25rem);
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: var(--ii-text-primary, hsl(222.2 84% 4.9%));
+}
+
+.ii-h5 {
+  font-size: clamp(1rem, 2vw + 0.5rem, 1.125rem);
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--ii-text-primary, hsl(222.2 84% 4.9%));
+}
+
+.ii-h6 {
+  font-size: clamp(0.875rem, 1.75vw + 0.5rem, 1rem);
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--ii-text-primary, hsl(222.2 84% 4.9%));
+}
+
+/* ============================================================================
+   BODY TEXT STYLES
+   ============================================================================ */
+
+.ii-body-lg {
+  font-size: clamp(1rem, 2.25vw + 0.5rem, 1.125rem);
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--ii-text-secondary, hsl(217.2 32.6% 37.5%));
+}
+
+.ii-body {
+  font-size: clamp(0.9375rem, 2vw + 0.5rem, 1rem);
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--ii-text-secondary, hsl(217.2 32.6% 37.5%));
+}
+
+.ii-body-sm {
+  font-size: clamp(0.8125rem, 1.75vw + 0.5rem, 0.875rem);
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--ii-text-tertiary, hsl(215.4 20.2% 55.1%));
+}
+
+/* ============================================================================
+   CAPTION & LABEL STYLES
+   ============================================================================ */
+
+.ii-caption {
+  font-size: clamp(0.6875rem, 1.5vw + 0.5rem, 0.75rem);
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  color: var(--ii-text-muted, hsl(215.4 16.3% 46.9%));
+}
+
+.ii-label {
+  font-size: clamp(0.75rem, 1.5vw + 0.5rem, 0.8125rem);
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.005em;
+  color: var(--ii-text-secondary, hsl(217.2 32.6% 37.5%));
+}
+
+.ii-overline {
+  font-size: clamp(0.625rem, 1.25vw + 0.5rem, 0.6875rem);
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ii-text-muted, hsl(215.4 16.3% 46.9%));
+}
+
+/* ============================================================================
+   RICH TEXT / PROSE STYLING
+   For issue descriptions, comments, and other rich content
+   ============================================================================ */
+
+.prose-issue-description {
+  font-size: clamp(0.875rem, 2vw + 0.5rem, 1rem);
+  line-height: 1.7;
+  color: var(--ii-text-secondary, hsl(217.2 32.6% 37.5%));
+  max-width: 100%;
+}
+
+.prose-issue-description h1,
+.prose-issue-description h2,
+.prose-issue-description h3,
+.prose-issue-description h4,
+.prose-issue-description h5,
+.prose-issue-description h6 {
+  font-weight: 600;
+  color: var(--ii-text-primary, hsl(222.2 84% 4.9%));
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+.prose-issue-description h1 { font-size: 1.5em; }
+.prose-issue-description h2 { font-size: 1.375em; }
+.prose-issue-description h3 { font-size: 1.25em; }
+.prose-issue-description h4 { font-size: 1.125em; }
+.prose-issue-description h5 { font-size: 1em; }
+.prose-issue-description h6 { font-size: 0.875em; }
+
+.prose-issue-description p {
+  color: var(--ii-text-secondary, hsl(217.2 32.6% 37.5%));
+  line-height: 1.75;
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.prose-issue-description a {
+  color: var(--ii-text-accent, hsl(210 100% 50%));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--ii-transition-fast, 150ms);
+}
+
+.prose-issue-description a:hover {
+  color: var(--ii-brand-800, hsl(210 100% 45%));
+}
+
+.prose-issue-description strong {
+  font-weight: 600;
+  color: var(--ii-text-primary, hsl(222.2 84% 4.9%));
+}
+
+.prose-issue-description em {
+  font-style: italic;
+}
+
+.prose-issue-description ul,
+.prose-issue-description ol {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  padding-left: 1.5em;
+}
+
+.prose-issue-description ul {
+  list-style-type: disc;
+}
+
+.prose-issue-description ol {
+  list-style-type: decimal;
+}
+
+.prose-issue-description li {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  padding-left: 0.25em;
+}
+
+.prose-issue-description li::marker {
+  color: var(--ii-text-muted, hsl(215.4 16.3% 46.9%));
+}
+
+.prose-issue-description blockquote {
+  margin-top: 1.25em;
+  margin-bottom: 1.25em;
+  padding-left: 1em;
+  border-left: 3px solid var(--ii-border-accent, hsl(210 100% 70%));
+  font-style: italic;
+  color: var(--ii-text-tertiary, hsl(215.4 20.2% 55.1%));
+}
+
+.prose-issue-description code {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.875em;
+  padding: 0.2em 0.4em;
+  background-color: var(--ii-bg-muted, hsl(210 40% 96.1%));
+  border-radius: var(--ii-radius-sm, 0.25rem);
+  color: var(--ii-danger-700, hsl(0 84.2% 60.2%));
+}
+
+.prose-issue-description pre {
+  margin-top: 1.25em;
+  margin-bottom: 1.25em;
+  padding: 1em;
+  background-color: var(--ii-bg-muted, hsl(210 40% 96.1%));
+  border-radius: var(--ii-radius-default, 0.5rem);
+  overflow-x: auto;
+}
+
+.prose-issue-description pre code {
+  padding: 0;
+  background-color: transparent;
+  color: inherit;
+  font-size: 0.875em;
+  line-height: 1.7;
+}
+
+.prose-issue-description hr {
+  margin-top: 2em;
+  margin-bottom: 2em;
+  border: none;
+  border-top: 1px solid var(--ii-border-default, hsl(214.3 31.8% 91.4%));
+}
+
+.prose-issue-description img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--ii-radius-default, 0.5rem);
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+
+.prose-issue-description table {
+  width: 100%;
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+  border-collapse: collapse;
+  font-size: 0.875em;
+}
+
+.prose-issue-description th,
+.prose-issue-description td {
+  padding: 0.75em 1em;
+  border: 1px solid var(--ii-border-default, hsl(214.3 31.8% 91.4%));
+  text-align: left;
+}
+
+.prose-issue-description th {
+  font-weight: 600;
+  background-color: var(--ii-bg-muted, hsl(210 40% 96.1%));
+  color: var(--ii-text-primary, hsl(222.2 84% 4.9%));
+}
+
+/* Dark mode adjustments for prose */
+[data-theme*="dark"] .prose-issue-description code,
+.dark .prose-issue-description code {
+  background-color: var(--ii-bg-surface-3, hsl(217.2 32.6% 15%));
+  color: var(--ii-danger-700, hsl(0 84.2% 62%));
+}
+
+[data-theme*="dark"] .prose-issue-description pre,
+.dark .prose-issue-description pre {
+  background-color: var(--ii-bg-surface-3, hsl(217.2 32.6% 15%));
+}
+
+[data-theme*="dark"] .prose-issue-description th,
+.dark .prose-issue-description th {
+  background-color: var(--ii-bg-surface-3, hsl(217.2 32.6% 15%));
+}
+
+/* ============================================================================
+   TEXT UTILITIES
+   ============================================================================ */
+
+/* Text Truncation */
+.ii-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ii-line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ii-line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ii-line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ii-line-clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Text Alignment */
+.ii-text-balance {
+  text-wrap: balance;
+}
+
+.ii-text-pretty {
+  text-wrap: pretty;
+}
+
+/* Text Selection */
+.ii-select-none {
+  user-select: none;
+}
+
+.ii-select-all {
+  user-select: all;
+}
+
+/* Link Styles */
+.ii-link {
+  color: var(--ii-text-accent, hsl(210 100% 50%));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+  transition: color var(--ii-transition-fast, 150ms);
+}
+
+.ii-link:hover {
+  color: var(--ii-brand-800, hsl(210 100% 45%));
+  text-decoration-thickness: 2px;
+}
+
+.ii-link-subtle {
+  color: var(--ii-text-secondary, hsl(217.2 32.6% 37.5%));
+  text-decoration: none;
+  transition: color var(--ii-transition-fast, 150ms);
+}
+
+.ii-link-subtle:hover {
+  color: var(--ii-text-accent, hsl(210 100% 50%));
+  text-decoration: underline;
+}
+
+/* ============================================================================
+   RESPONSIVE TYPOGRAPHY ADJUSTMENTS
+   ============================================================================ */
+
+/* Reduce letter-spacing on smaller screens for better readability */
+@media (max-width: 640px) {
+  .ii-h1,
+  .ii-h2,
+  .ii-h3 {
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Increase base font size on larger screens */
+@media (min-width: 1280px) {
+  :root {
+    --ii-base-font-size: 16px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .ii-h1,
+  .ii-h2,
+  .ii-h3,
+  .ii-h4,
+  .ii-h5,
+  .ii-h6,
+  .ii-body,
+  .ii-body-lg,
+  .ii-body-sm,
+  .prose-issue-description {
+    color: #000 !important;
+  }
+
+  .prose-issue-description a {
+    text-decoration: underline;
+    color: #000 !important;
+  }
+
+  .prose-issue-description code,
+  .prose-issue-description pre {
+    background-color: #f5f5f5 !important;
+  }
+}
