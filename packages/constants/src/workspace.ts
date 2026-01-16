@@ -122,7 +122,8 @@ export const WORKSPACE_SETTINGS_LINKS: {
 }[] = [
   WORKSPACE_SETTINGS["general"],
   WORKSPACE_SETTINGS["members"],
-  WORKSPACE_SETTINGS["billing-and-plans"],
+  // Hidden: Billing menu removed for custom instance
+  // WORKSPACE_SETTINGS["billing-and-plans"],
   WORKSPACE_SETTINGS["export"],
   WORKSPACE_SETTINGS["webhooks"],
 ];

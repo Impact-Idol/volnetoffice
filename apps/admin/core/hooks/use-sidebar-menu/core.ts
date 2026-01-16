@@ -39,7 +39,7 @@ export const coreSidebarMenuLinks: Record<TCoreSidebarMenuKey, TSidebarMenuItem>
   },
   image: {
     Icon: Image,
-    name: "Images in Plane",
+    name: "Images",
     description: "Allow third-party image libraries.",
     href: `/image/`,
   },
