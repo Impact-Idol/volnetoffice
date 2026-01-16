@@ -78,147 +78,176 @@ class ImpactIdolSSOView(View):
     def post(self, request):
         """Handle SSO authentication request."""
         try:
-            data = json.loads(request.body)
-        except json.JSONDecodeError:
-            return JsonResponse(
-                {"error": "Invalid JSON body"},
-                status=400,
+            try:
+                data = json.loads(request.body)
+            except json.JSONDecodeError:
+                return JsonResponse(
+                    {"error": "Invalid JSON body"},
+                    status=400,
+                )
+
+            token = data.get("token")
+            if not token:
+                return JsonResponse(
+                    {"error": "Token required"},
+                    status=400,
+                )
+
+            # Validate JWT token
+            jwt_secret = getattr(settings, "IMPACTIDOL_JWT_SECRET", None)
+            if not jwt_secret:
+                logger.error("IMPACTIDOL_JWT_SECRET not configured")
+                return JsonResponse(
+                    {"error": "SSO not configured"},
+                    status=500,
+                )
+
+            try:
+                payload = jwt.decode(
+                    token,
+                    jwt_secret,
+                    algorithms=["HS256"],
+                )
+            except jwt.ExpiredSignatureError:
+                self._log_auth_failure(request, None, "Token expired")
+                return JsonResponse(
+                    {"error": "Token expired"},
+                    status=401,
+                )
+            except jwt.InvalidTokenError as e:
+                self._log_auth_failure(request, None, f"Invalid token: {str(e)}")
+                return JsonResponse(
+                    {"error": f"Invalid token: {str(e)}"},
+                    status=401,
+                )
+
+            # Extract payload fields
+            email = payload.get("email", "").lower().strip()
+            name = payload.get("name", "")
+            role = payload.get("role", "")
+            status = payload.get("status", "")
+            impactidol_user_id = payload.get("sub", "")
+
+            if not email:
+                return JsonResponse(
+                    {"error": "Email required in token"},
+                    status=400,
+                )
+
+            # CRITICAL: Validate user status
+            if status != "ACTIVE":
+                self._log_auth_failure(
+                    request,
+                    email,
+                    f"User account not active (status: {status})",
+                )
+                return JsonResponse(
+                    {"error": "User account is not active"},
+                    status=403,
+                )
+
+            # CRITICAL: Validate role has Plane access
+            if role not in ALLOWED_ROLES:
+                self._log_auth_failure(
+                    request,
+                    email,
+                    f"Insufficient permissions (role: {role})",
+                )
+                return JsonResponse(
+                    {"error": "Insufficient permissions for Plane access"},
+                    status=403,
+                )
+
+            # Get or create Plane user
+            # Generate username from email (before @ symbol)
+            username = email.split("@")[0]
+
+            user, created = User.objects.get_or_create(
+                email=email,
+                defaults={
+                    "username": username,
+                    "first_name": self._extract_first_name(name),
+                    "last_name": self._extract_last_name(name),
+                    "display_name": name or username,
+                    "is_active": True,
+                    "is_email_verified": True,  # Trust Impact Idol verification
+                },
             )
 
-        token = data.get("token")
-        if not token:
-            return JsonResponse(
-                {"error": "Token required"},
-                status=400,
-            )
+            # Ensure user is active (may have been deactivated previously)
+            if not user.is_active:
+                user.is_active = True
+                user.save(update_fields=["is_active"])
 
-        # Validate JWT token
-        jwt_secret = getattr(settings, "IMPACTIDOL_JWT_SECRET", None)
-        if not jwt_secret:
-            logger.error("IMPACTIDOL_JWT_SECRET not configured")
+            # Ensure user has a profile (required for frontend)
+            # Mark SSO users as onboarded to skip onboarding flow
+            if created or not hasattr(user, 'profile'):
+                Profile.objects.get_or_create(
+                    user=user,
+                    defaults={
+                        'is_onboarded': True,
+                    }
+                )
+            else:
+                # Update existing profile to mark as onboarded
+                profile = user.profile
+                if not profile.is_onboarded:
+                    profile.is_onboarded = True
+                    profile.save(update_fields=['is_onboarded'])
+
+            # Sync user to default workspace with appropriate role
+            self._sync_user_to_workspace(user, role)
+
+            # Update last login info
+            user.last_login_time = timezone.now()
+            user.last_login_ip = user_ip(request)
+            user.last_login_medium = "impactidol_sso"
+            user.save(update_fields=[
+                "last_login_time",
+                "last_login_ip",
+                "last_login_medium",
+            ])
+
+            # IMPORTANT: Ensure session is available
+            # CSRF exempt views don't automatically create sessions
+            if not request.session.session_key:
+                request.session.create()
+
+            # Log the user in using Django's session authentication
+            # This creates a session and sets the sessionid cookie
+            django_login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+
+            # Force session save to ensure it's persisted
+            request.session.save()
+
+            # Log successful authentication
+            self._log_auth_success(request, user, created, impactidol_user_id)
+
+            # Return success response with user info
+            response = JsonResponse({
+                "success": True,
+                "user": {
+                    "id": str(user.id),
+                    "email": user.email,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name,
+                    "display_name": user.display_name,
+                },
+            })
+
+            return response
+
+        except Exception as e:
+            # Log the full exception for debugging
+            logger.exception(
+                "Impact Idol SSO: Unexpected error during authentication",
+                extra={"error": str(e)},
+            )
+            # Return generic error to user
             return JsonResponse(
-                {"error": "SSO not configured"},
+                {"error": "Authentication failed"},
                 status=500,
             )
-
-        try:
-            payload = jwt.decode(
-                token,
-                jwt_secret,
-                algorithms=["HS256"],
-            )
-        except jwt.ExpiredSignatureError:
-            self._log_auth_failure(request, None, "Token expired")
-            return JsonResponse(
-                {"error": "Token expired"},
-                status=401,
-            )
-        except jwt.InvalidTokenError as e:
-            self._log_auth_failure(request, None, f"Invalid token: {str(e)}")
-            return JsonResponse(
-                {"error": f"Invalid token: {str(e)}"},
-                status=401,
-            )
-
-        # Extract payload fields
-        email = payload.get("email", "").lower().strip()
-        name = payload.get("name", "")
-        role = payload.get("role", "")
-        status = payload.get("status", "")
-        impactidol_user_id = payload.get("sub", "")
-
-        if not email:
-            return JsonResponse(
-                {"error": "Email required in token"},
-                status=400,
-            )
-
-        # CRITICAL: Validate user status
-        if status != "ACTIVE":
-            self._log_auth_failure(
-                request,
-                email,
-                f"User account not active (status: {status})",
-            )
-            return JsonResponse(
-                {"error": "User account is not active"},
-                status=403,
-            )
-
-        # CRITICAL: Validate role has Plane access
-        if role not in ALLOWED_ROLES:
-            self._log_auth_failure(
-                request,
-                email,
-                f"Insufficient permissions (role: {role})",
-            )
-            return JsonResponse(
-                {"error": "Insufficient permissions for Plane access"},
-                status=403,
-            )
-
-        # Get or create Plane user
-        user, created = User.objects.get_or_create(
-            email=email,
-            defaults={
-                "first_name": self._extract_first_name(name),
-                "last_name": self._extract_last_name(name),
-                "display_name": name or email.split("@")[0],
-                "is_active": True,
-                "is_email_verified": True,  # Trust Impact Idol verification
-            },
-        )
-
-        # Ensure user is active (may have been deactivated previously)
-        if not user.is_active:
-            user.is_active = True
-            user.save(update_fields=["is_active"])
-
-        # Ensure user has a profile (required for frontend)
-        if created or not hasattr(user, 'profile'):
-            Profile.objects.get_or_create(user=user)
-
-        # Sync user to default workspace with appropriate role
-        self._sync_user_to_workspace(user, role)
-
-        # Update last login info
-        user.last_login_time = timezone.now()
-        user.last_login_ip = user_ip(request)
-        user.last_login_medium = "impactidol_sso"
-        user.save(update_fields=[
-            "last_login_time",
-            "last_login_ip",
-            "last_login_medium",
-        ])
-
-        # IMPORTANT: Ensure session is available
-        # CSRF exempt views don't automatically create sessions
-        if not request.session.session_key:
-            request.session.create()
-
-        # Log the user in using Django's session authentication
-        # This creates a session and sets the sessionid cookie
-        django_login(request, user, backend="django.contrib.auth.backends.ModelBackend")
-
-        # Force session save to ensure it's persisted
-        request.session.save()
-
-        # Log successful authentication
-        self._log_auth_success(request, user, created, impactidol_user_id)
-
-        # Return success response with user info
-        response = JsonResponse({
-            "success": True,
-            "user": {
-                "id": str(user.id),
-                "email": user.email,
-                "first_name": user.first_name,
-                "last_name": user.last_name,
-                "display_name": user.display_name,
-            },
-        })
-
-        return response
 
 
     def _sync_user_to_workspace(self, user, impact_role: str):

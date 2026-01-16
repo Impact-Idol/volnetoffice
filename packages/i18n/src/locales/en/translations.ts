@@ -402,7 +402,7 @@ export default {
       not_right_now: "Not right now",
       create_project: {
         title: "Create a project",
-        description: "Most things start with a project in Plane.",
+        description: "Most things start with a project.",
         cta: "Get started",
       },
       invite_team: {
@@ -416,7 +416,7 @@ export default {
         cta: "Configure this workspace",
       },
       personalize_account: {
-        title: "Make Plane yours.",
+        title: "Personalize your account.",
         description: "Choose your picture, colors, and more.",
         cta: "Personalize now",
       },

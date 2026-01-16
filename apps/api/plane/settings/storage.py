@@ -18,8 +18,9 @@ class S3Storage(S3Boto3Storage):
 
     """S3 storage class to generate presigned URLs for S3 objects"""
 
-    def __init__(self, request=None):
+    def __init__(self, request=None, is_server=False):
         # Get the AWS credentials and bucket name from the environment
+        # Note: request and is_server parameters kept for backwards compatibility but not used
         self.aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
         # Use the AWS_SECRET_ACCESS_KEY environment variable for the secret key
         self.aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
@@ -29,22 +30,33 @@ class S3Storage(S3Boto3Storage):
         self.aws_region = os.environ.get("AWS_REGION")
         # Use the AWS_S3_ENDPOINT_URL environment variable for the endpoint URL
         self.aws_s3_endpoint_url = os.environ.get("AWS_S3_ENDPOINT_URL") or os.environ.get("MINIO_ENDPOINT_URL")
+        # Public-facing URL for browser access (falls back to endpoint URL)
+        self.aws_s3_public_url = os.environ.get("AWS_S3_PUBLIC_URL") or self.aws_s3_endpoint_url
         # Use the SIGNED_URL_EXPIRATION environment variable for the expiration time (default: 3600 seconds)
         self.signed_url_expiration = int(os.environ.get("SIGNED_URL_EXPIRATION", "3600"))
 
         if os.environ.get("USE_MINIO") == "1":
-            # Determine protocol based on environment variable
-            if os.environ.get("MINIO_ENDPOINT_SSL") == "1":
-                endpoint_protocol = "https"
-            else:
-                endpoint_protocol = request.scheme if request else "http"
-            # Create an S3 client for MinIO
+            # Create two S3 clients for MinIO:
+            # 1. Public endpoint client for presigned URLs (browser-facing)
+            # 2. Internal endpoint client for direct operations (server-side)
+
+            # Client for generating presigned URLs with public endpoint
             self.s3_client = boto3.client(
                 "s3",
                 aws_access_key_id=self.aws_access_key_id,
                 aws_secret_access_key=self.aws_secret_access_key,
                 region_name=self.aws_region,
-                endpoint_url=(f"{endpoint_protocol}://{request.get_host()}" if request else self.aws_s3_endpoint_url),
+                endpoint_url=self.aws_s3_public_url,  # Use public endpoint for presigned URLs
+                config=boto3.session.Config(signature_version="s3v4", s3={'addressing_style': 'path'}),
+            )
+
+            # Client for direct operations (metadata, upload, copy, delete)
+            self.s3_direct_client = boto3.client(
+                "s3",
+                aws_access_key_id=self.aws_access_key_id,
+                aws_secret_access_key=self.aws_secret_access_key,
+                region_name=self.aws_region,
+                endpoint_url=self.aws_s3_endpoint_url,  # Use internal endpoint for direct operations
                 config=boto3.session.Config(signature_version="s3v4"),
             )
         else:
@@ -80,6 +92,7 @@ class S3Storage(S3Boto3Storage):
         # Generate the presigned POST URL
         try:
             # Generate a presigned URL for the S3 object
+            # Note: s3_client is already configured with the public endpoint for MinIO
             response = self.s3_client.generate_presigned_post(
                 Bucket=self.aws_storage_bucket_name,
                 Key=object_name,
@@ -118,6 +131,8 @@ class S3Storage(S3Boto3Storage):
             expiration = self.signed_url_expiration
         content_disposition = self._get_content_disposition(disposition, filename)
         try:
+            # Generate presigned URL
+            # Note: s3_client is already configured with the public endpoint for MinIO
             response = self.s3_client.generate_presigned_url(
                 "get_object",
                 Params={
@@ -137,8 +152,10 @@ class S3Storage(S3Boto3Storage):
 
     def get_object_metadata(self, object_name):
         """Get the metadata for an S3 object"""
+        # Use direct client for server-side operations (MinIO) or regular client (AWS S3)
+        client = getattr(self, 's3_direct_client', self.s3_client)
         try:
-            response = self.s3_client.head_object(Bucket=self.aws_storage_bucket_name, Key=object_name)
+            response = client.head_object(Bucket=self.aws_storage_bucket_name, Key=object_name)
         except ClientError as e:
             log_exception(e)
             return None
@@ -153,8 +170,10 @@ class S3Storage(S3Boto3Storage):
 
     def copy_object(self, object_name, new_object_name):
         """Copy an S3 object to a new location"""
+        # Use direct client for server-side operations (MinIO) or regular client (AWS S3)
+        client = getattr(self, 's3_direct_client', self.s3_client)
         try:
-            response = self.s3_client.copy_object(
+            response = client.copy_object(
                 Bucket=self.aws_storage_bucket_name,
                 CopySource={"Bucket": self.aws_storage_bucket_name, "Key": object_name},
                 Key=new_object_name,
@@ -173,11 +192,13 @@ class S3Storage(S3Boto3Storage):
         extra_args: dict = {},
     ) -> bool:
         """Upload a file directly to S3"""
+        # Use direct client for server-side operations (MinIO) or regular client (AWS S3)
+        client = getattr(self, 's3_direct_client', self.s3_client)
         try:
             if content_type:
                 extra_args["ContentType"] = content_type
 
-            self.s3_client.upload_fileobj(
+            client.upload_fileobj(
                 file_obj,
                 self.aws_storage_bucket_name,
                 object_name,
@@ -190,8 +211,10 @@ class S3Storage(S3Boto3Storage):
 
     def delete_files(self, object_names):
         """Delete an S3 object"""
+        # Use direct client for server-side operations (MinIO) or regular client (AWS S3)
+        client = getattr(self, 's3_direct_client', self.s3_client)
         try:
-            self.s3_client.delete_objects(
+            client.delete_objects(
                 Bucket=self.aws_storage_bucket_name,
                 Delete={"Objects": [{"Key": object_name} for object_name in object_names]},
             )

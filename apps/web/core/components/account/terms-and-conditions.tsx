@@ -30,9 +30,7 @@ export function TermsAndConditions({ authType = EAuthModes.SIGN_IN }: TermsAndCo
   return (
     <div className="flex items-center justify-center">
       <p className="text-center text-13 text-tertiary whitespace-pre-line">
-        {`${MESSAGES[authType]}, you understand and agree to \n our `}
-        <LegalLink href={LEGAL_LINKS.termsOfService}>Terms of Service</LegalLink> and{" "}
-        <LegalLink href={LEGAL_LINKS.privacyPolicy}>Privacy Policy</LegalLink>.
+        {`${MESSAGES[authType]}, you understand and agree to Impact Idol's Terms of Service and Privacy Policy. \n Please refer to the main Impact Idol application for details.`}
       </p>
     </div>
   );

@@ -10,7 +10,7 @@ export function PageHead(props: PageHeadTitleProps) {
 
   useEffect(() => {
     if (title) {
-      document.title = title ?? "Plane | Simple, extensible, open-source project management tool.";
+      document.title = title ?? "Impact Idol | Volunteer Management Platform";
     }
   }, [title]);
 

@@ -1,6 +1,7 @@
 from .asset import urlpatterns as asset_patterns
 from .cycle import urlpatterns as cycle_patterns
 from .intake import urlpatterns as intake_patterns
+from .integration import urlpatterns as integration_patterns
 from .label import urlpatterns as label_patterns
 from .member import urlpatterns as member_patterns
 from .module import urlpatterns as module_patterns
@@ -15,6 +16,7 @@ urlpatterns = [
     *asset_patterns,
     *cycle_patterns,
     *intake_patterns,
+    *integration_patterns,
     *label_patterns,
     *member_patterns,
     *module_patterns,

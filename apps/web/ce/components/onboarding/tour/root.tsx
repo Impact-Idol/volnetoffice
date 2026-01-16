@@ -30,48 +30,48 @@ const TOUR_STEPS: {
   prevStep?: TTourSteps;
   nextStep?: TTourSteps;
 }[] = [
-  {
-    key: "work-items",
-    title: "Plan with work items",
-    description:
-      "The work item is the building block of the Plane. Most concepts in Plane are either associated with work items and their properties.",
-    image: IssuesTour,
-    nextStep: "cycles",
-  },
-  {
-    key: "cycles",
-    title: "Move with cycles",
-    description:
-      "Cycles help you and your team to progress faster, similar to the sprints commonly used in agile development.",
-    image: CyclesTour,
-    prevStep: "work-items",
-    nextStep: "modules",
-  },
-  {
-    key: "modules",
-    title: "Break into modules",
-    description: "Modules break your big thing into Projects or Features, to help you organize better.",
-    image: ModulesTour,
-    prevStep: "cycles",
-    nextStep: "views",
-  },
-  {
-    key: "views",
-    title: "Views",
-    description:
-      "Create custom filters to display only the work items that matter to you. Save and share your filters in just a few clicks.",
-    image: ViewsTour,
-    prevStep: "modules",
-    nextStep: "pages",
-  },
-  {
-    key: "pages",
-    title: "Document with pages",
-    description: "Use Pages to quickly jot down work items when you're in a meeting or starting a day.",
-    image: PagesTour,
-    prevStep: "views",
-  },
-];
+    {
+      key: "work-items",
+      title: "Plan with work items",
+      description:
+        "The work item is the building block of the system. Most concepts are either associated with work items and their properties.",
+      image: IssuesTour,
+      nextStep: "cycles",
+    },
+    {
+      key: "cycles",
+      title: "Move with cycles",
+      description:
+        "Cycles help you and your team to progress faster, similar to the sprints commonly used in agile development.",
+      image: CyclesTour,
+      prevStep: "work-items",
+      nextStep: "modules",
+    },
+    {
+      key: "modules",
+      title: "Break into modules",
+      description: "Modules break your big thing into Projects or Features, to help you organize better.",
+      image: ModulesTour,
+      prevStep: "cycles",
+      nextStep: "views",
+    },
+    {
+      key: "views",
+      title: "Views",
+      description:
+        "Create custom filters to display only the work items that matter to you. Save and share your filters in just a few clicks.",
+      image: ViewsTour,
+      prevStep: "modules",
+      nextStep: "pages",
+    },
+    {
+      key: "pages",
+      title: "Document with pages",
+      description: "Use Pages to quickly jot down work items when you're in a meeting or starting a day.",
+      image: PagesTour,
+      prevStep: "views",
+    },
+  ];
 
 export const TourRoot = observer(function TourRoot(props: TOnboardingTourProps) {
   const { onComplete } = props;
@@ -94,10 +94,10 @@ export const TourRoot = observer(function TourRoot(props: TOnboardingTourProps) 
             </div>
             <div className="flex flex-col overflow-y-auto p-6">
               <h3 className="font-semibold sm:text-18">
-                Welcome to Plane, {currentUser?.first_name} {currentUser?.last_name}
+                Welcome to Staff Platform, {currentUser?.first_name} {currentUser?.last_name}
               </h3>
               <p className="mt-3 text-13 text-secondary">
-                We{"'"}re glad that you decided to try out Plane. You can now manage your projects with ease. Get
+                We{"'"}re glad that you decided to try out the platform. You can now manage your projects with ease. Get
                 started by creating a project.
               </p>
               <div className="flex h-full items-end">
@@ -136,9 +136,8 @@ export const TourRoot = observer(function TourRoot(props: TOnboardingTourProps) 
           <TourSidebar step={step} setStep={setStep} />
           <div className="col-span-10 h-full overflow-hidden lg:col-span-7">
             <div
-              className={`flex h-1/2 items-end overflow-hidden bg-accent-primary sm:h-3/5 ${
-                currentStepIndex % 2 === 0 ? "justify-end" : "justify-start"
-              }`}
+              className={`flex h-1/2 items-end overflow-hidden bg-accent-primary sm:h-3/5 ${currentStepIndex % 2 === 0 ? "justify-end" : "justify-start"
+                }`}
             >
               <img src={currentStep?.image} className="w-full h-full object-cover" alt={currentStep?.title} />
             </div>

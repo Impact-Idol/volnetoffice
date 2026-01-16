@@ -71,21 +71,59 @@ function SSOPage() {
   }, [location.search]);
 
   if (error) {
+    const isTokenExpired = error.toLowerCase().includes("expired");
+    const friendlyMessage = isTokenExpired
+      ? "Your login link has expired. This can happen if the page took too long to load or you refreshed the page."
+      : error;
+
     return (
       <DefaultLayout>
-        <div className="flex min-h-screen items-center justify-center">
-          <div className="text-center max-w-md">
-            <h1 className="text-2xl font-bold text-red-500 mb-4">Authentication Failed</h1>
-            <p className="text-neutral-600 dark:text-neutral-400 mb-6">{error}</p>
-            <div className="space-y-2">
+        <div className="flex min-h-screen items-center justify-center px-4">
+          <div className="text-center max-w-md w-full">
+            <div className="mb-6">
+              <div className="mx-auto w-16 h-16 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center mb-4">
+                <svg
+                  className="w-8 h-8 text-yellow-600 dark:text-yellow-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              </div>
+              <h1 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100 mb-2">
+                Unable to Sign In Automatically
+              </h1>
+              <p className="text-neutral-600 dark:text-neutral-400 mb-6">{friendlyMessage}</p>
+            </div>
+
+            <div className="space-y-3">
               <a
                 href="/"
-                className="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                className="block w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
               >
-                Back to Sign In
+                Sign In with Password
               </a>
-              <p className="text-sm text-neutral-500 mt-4">
-                If you continue to experience issues, please contact your administrator.
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                Or{" "}
+                <a
+                  href="javascript:window.close()"
+                  className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                >
+                  go back to Impact Idol
+                </a>{" "}
+                and try again
+              </p>
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-neutral-200 dark:border-neutral-700">
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                <strong>Tip:</strong> Login links expire after 5 minutes for security. If you need help, contact your administrator.
               </p>
             </div>
           </div>

@@ -67,8 +67,9 @@ export const NoProjectsEmptyState = observer(function NoProjectsEmptyState() {
       flag: "visited_members",
       cta: {
         text: "home.empty.invite_team.cta",
-        link: `/${workspaceSlug}/settings/members`,
+        link: `${process.env.NEXT_PUBLIC_IMPACTIDOL_URL || 'http://localhost:4500'}/admin/users`,
         disabled: !isWorkspaceAdmin,
+        external: true, // Open in new tab since it's external to VolNetOffice
       },
     },
     {
@@ -164,23 +165,45 @@ export const NoProjectsEmptyState = observer(function NoProjectsEmptyState() {
               ) : (
                 !item.cta.disabled &&
                 (item.cta.link ? (
-                  <Link
-                    href={item.cta.link}
-                    onClick={(e) => {
-                      if (!storedValue) {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        return;
-                      }
-                      setValue({
-                        ...storedValue,
-                        [item.flag]: true,
-                      });
-                    }}
-                    className={cn("text-accent-primary hover:text-accent-secondary text-13 font-medium", {})}
-                  >
-                    {t(item.cta.text)}
-                  </Link>
+                  item.cta.external ? (
+                    <a
+                      href={item.cta.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => {
+                        if (!storedValue) {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          return;
+                        }
+                        setValue({
+                          ...storedValue,
+                          [item.flag]: true,
+                        });
+                      }}
+                      className={cn("text-accent-primary hover:text-accent-secondary text-13 font-medium", {})}
+                    >
+                      {t(item.cta.text)}
+                    </a>
+                  ) : (
+                    <Link
+                      href={item.cta.link}
+                      onClick={(e) => {
+                        if (!storedValue) {
+                          e.stopPropagation();
+                          e.preventDefault();
+                          return;
+                        }
+                        setValue({
+                          ...storedValue,
+                          [item.flag]: true,
+                        });
+                      }}
+                      className={cn("text-accent-primary hover:text-accent-secondary text-13 font-medium", {})}
+                    >
+                      {t(item.cta.text)}
+                    </Link>
+                  )
                 ) : (
                   <button
                     type="button"

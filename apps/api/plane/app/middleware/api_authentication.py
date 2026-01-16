@@ -20,7 +20,8 @@ class APIKeyAuthentication(authentication.BaseAuthentication):
     auth_header_name = "X-Api-Key"
 
     def get_api_token(self, request):
-        return request.headers.get(self.auth_header_name)
+        # Support both X-Api-Key and X-Service-Token headers for backwards compatibility
+        return request.headers.get(self.auth_header_name) or request.headers.get("X-Service-Token")
 
     def validate_api_token(self, token):
         try:

@@ -131,7 +131,14 @@ const WorkspaceMembersSettingsPage = observer(function WorkspaceMembersSettingsP
             />
             <MembersActivityButton workspaceSlug={workspaceSlug} />
             {canPerformWorkspaceAdminActions && (
-              <Button variant="primary" size="lg" onClick={() => setInviteModal(true)}>
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={() => {
+                  const impactIdolUrl = process.env.NEXT_PUBLIC_IMPACTIDOL_URL || 'http://localhost:4500';
+                  window.open(`${impactIdolUrl}/admin/users`, '_blank', 'noopener,noreferrer');
+                }}
+              >
                 {t("workspace_settings.settings.members.add_member")}
               </Button>
             )}

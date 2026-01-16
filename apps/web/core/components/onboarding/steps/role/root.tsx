@@ -86,7 +86,7 @@ export const RoleSetupStep = observer(function RoleSetupStep({ handleStepChange 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-10">
       {/* Header */}
-      <CommonOnboardingHeader title="What's your role?" description="Let's set up Plane for how you work." />
+      <CommonOnboardingHeader title="What's your role?" description="Let's set up the system for how you work." />
       {/* Role Selection */}
       <div className="flex flex-col gap-3">
         <p className="text-body-sm-semibold text-placeholder">Select one</p>
@@ -110,11 +110,10 @@ export const RoleSetupStep = observer(function RoleSetupStep({ handleStepChange 
                       e.preventDefault();
                       onChange(role.id);
                     }}
-                    className={`w-full px-3 py-2 rounded-lg border transition-all duration-200 flex items-center justify-between ${
-                      isSelected
+                    className={`w-full px-3 py-2 rounded-lg border transition-all duration-200 flex items-center justify-between ${isSelected
                         ? "border-accent-strong bg-accent-subtle text-accent-primary"
                         : "border-subtle hover:border-strong text-tertiary"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center space-x-3">
                       <Icon className="size-3.5" />
