@@ -1,9 +1,9 @@
 // components
 import { observer } from "mobx-react";
 import { useParams, usePathname } from "next/navigation";
+import { Home } from "lucide-react";
 import { cn } from "@plane/utils";
 import { TopNavPowerK } from "@/components/navigation";
-import { HelpMenuRoot } from "@/components/workspace/sidebar/help-section/root";
 import { WorkspaceMenuRoot } from "@/components/workspace/sidebar/workspace-menu-root";
 import { useAppRailPreferences } from "@/hooks/use-navigation-preferences";
 import { Tooltip } from "@plane/propel/tooltip";
@@ -11,6 +11,9 @@ import { AppSidebarItem } from "@/components/sidebar/sidebar-item";
 import { InboxIcon } from "@plane/propel/icons";
 import useSWR from "swr";
 import { useWorkspaceNotifications } from "@/hooks/store/notifications";
+
+// Impact Idol portal URL (configured via environment variable)
+const IMPACTIDOL_URL = process.env.NEXT_PUBLIC_IMPACTIDOL_URL || "http://localhost:4500";
 
 export const TopNavigationRoot = observer(function TopNavigationRoot() {
   // router
@@ -42,7 +45,7 @@ export const TopNavigationRoot = observer(function TopNavigationRoot() {
       })}
     >
       {/* Workspace Menu */}
-      <div className="shrink-0 flex-1">
+      <div className="shrink-0 flex-1 flex items-center gap-2">
         <WorkspaceMenuRoot variant="top-navigation" />
       </div>
       {/* Power K Search */}
@@ -51,6 +54,18 @@ export const TopNavigationRoot = observer(function TopNavigationRoot() {
       </div>
       {/* Additional Actions */}
       <div className="shrink-0 flex-1 flex gap-1 items-center justify-end">
+        {/* Impact Idol Portal Link */}
+        <Tooltip tooltipContent="Back to Impact Idol" position="bottom">
+          <a
+            href={IMPACTIDOL_URL}
+            className="group flex flex-col gap-0.5 items-center justify-center text-tertiary"
+            rel="noopener noreferrer"
+          >
+            <div className="flex items-center justify-center gap-2 size-8 rounded-md text-tertiary group-hover:text-icon-secondary group-hover:bg-layer-transparent-hover !text-icon-tertiary">
+              <Home className="size-5" />
+            </div>
+          </a>
+        </Tooltip>
         <Tooltip tooltipContent="Inbox" position="bottom">
           <AppSidebarItem
             variant="link"
@@ -68,7 +83,7 @@ export const TopNavigationRoot = observer(function TopNavigationRoot() {
             }}
           />
         </Tooltip>
-        <HelpMenuRoot />
+        {/* HelpMenuRoot removed - Impact Idol branding */}
       </div>
     </div>
   );

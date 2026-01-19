@@ -76,8 +76,21 @@ export const SidebarWrapper = observer(function SidebarWrapper(props: TSidebarWr
           {children}
         </ScrollArea>
         {/* Help Section */}
-        <div className="flex items-center justify-between p-3 border-t border-subtle bg-surface-1 h-12">
+        <div className="relative flex items-center p-3 border-t border-subtle bg-surface-1 h-12">
           <UserMenuRoot size="md" />
+          {/* Impact Idol Logo - centered, theme aware (horizontal wordmark) */}
+          <div className="absolute left-1/2 -translate-x-1/2 h-6 w-28 flex-shrink-0">
+            <img
+              src="/impactidol-logo-light.svg"
+              className="h-full w-full object-contain block [[data-theme*='dark']_&]:hidden"
+              alt="Impact Idol"
+            />
+            <img
+              src="/impactidol-logo-dark.svg"
+              className="h-full w-full object-contain hidden [[data-theme*='dark']_&]:block"
+              alt="Impact Idol"
+            />
+          </div>
         </div>
       </div>
     </>
