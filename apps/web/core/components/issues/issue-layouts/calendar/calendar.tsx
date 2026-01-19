@@ -87,8 +87,15 @@ export const CalendarChart = observer(function CalendarChart(props: Props) {
     readOnly = false,
     isEpic = false,
   } = props;
-  // states
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  // states - initialize with null to avoid hydration mismatch
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+  // Set current date on client only
+  useEffect(() => {
+    if (!selectedDate) {
+      setSelectedDate(new Date());
+    }
+  }, []);
   //refs
   const scrollableContainerRef = useRef<HTMLDivElement | null>(null);
   // store hooks
@@ -104,7 +111,7 @@ export const CalendarChart = observer(function CalendarChart(props: Props) {
 
   const allWeeksOfActiveMonth = issueCalendarView.allWeeksOfActiveMonth;
 
-  const formattedDatePayload = renderFormattedPayloadDate(selectedDate) ?? undefined;
+  const formattedDatePayload = selectedDate ? renderFormattedPayloadDate(selectedDate) ?? undefined : undefined;
 
   // Enable Auto Scroll for calendar
   useEffect(() => {
@@ -119,7 +126,7 @@ export const CalendarChart = observer(function CalendarChart(props: Props) {
     );
   }, [scrollableContainerRef?.current]);
 
-  if (!calendarPayload || !formattedDatePayload)
+  if (!calendarPayload || !formattedDatePayload || !selectedDate)
     return (
       <div className="grid h-full w-full place-items-center">
         <Spinner />

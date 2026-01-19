@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 
 const useSize = () => {
-  const [windowSize, setWindowSize] = useState([window.innerWidth, window.innerHeight]);
+  const [windowSize, setWindowSize] = useState<[number, number]>([0, 0]);
 
   useEffect(() => {
+    // Set initial size on client only to avoid hydration mismatch
+    setWindowSize([window.innerWidth, window.innerHeight]);
+
     const windowSizeHandler = () => {
       setWindowSize([window.innerWidth, window.innerHeight]);
     };

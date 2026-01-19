@@ -17,6 +17,16 @@ export function UserGreetingsView(props: IUserGreetingsView) {
   // store hooks
   const { t } = useTranslation();
 
+  // Return loading state while currentTime is null (avoids hydration mismatch)
+  if (!currentTime) {
+    return (
+      <div className="flex flex-col items-center my-6">
+        <h2 className="text-20 font-semibold text-center">&nbsp;</h2>
+        <h5 className="flex items-center gap-2 font-medium text-placeholder">&nbsp;</h5>
+      </div>
+    );
+  }
+
   const hour = new Intl.DateTimeFormat("en-US", {
     hour12: false,
     hour: "numeric",

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 // ui
 import { useTranslation } from "@plane/i18n";
 import { Button } from "@plane/propel/button";
@@ -14,8 +14,15 @@ export type InboxIssueSnoozeModalProps = {
 
 export function InboxIssueSnoozeModal(props: InboxIssueSnoozeModalProps) {
   const { isOpen, handleClose, value, onConfirm } = props;
-  // states
-  const [date, setDate] = useState(value || new Date());
+  // states - initialize with value or null to avoid hydration mismatch
+  const [date, setDate] = useState<Date | null>(value || null);
+
+  // Set current date on client only
+  useEffect(() => {
+    if (!date) {
+      setDate(new Date());
+    }
+  }, []);
   //hooks
   const { t } = useTranslation();
 
@@ -40,7 +47,9 @@ export function InboxIssueSnoozeModal(props: InboxIssueSnoozeModalProps) {
         />
         <Button
           variant="primary"
+          disabled={!date}
           onClick={() => {
+            if (!date) return;
             handleClose();
             onConfirm(date);
           }}
